@@ -1,15 +1,21 @@
 package br.ufal.ic.jackut.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class User {
+    private String id;
     private String username;
     private String password;
-    private String name;
+    private Map<String, String> attributes;
 
 
-    public User(String username, String password, String name) {
+    public User(String username, String password, String name, String id) {
+        this.id = id;
         this.username = username;
         this.password = password;
-        this.name = name;
+        this.attributes = new HashMap<>(); 
+        this.attributes.put("nome", name);
     }
 
 
@@ -32,14 +38,20 @@ public class User {
         this.password = password;
     }
 
-
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
-
-    public void setName(String name) {
-        this.name = name;
+    public void setId(String id) {
+        this.id = id;
     }
 
+    public String getAttribute(String key) {
+        return this.attributes.get(key);
+    }
+
+    public void setAttribute(String key, String value) {
+        this.attributes.put(key, value);
+    }
 }
+

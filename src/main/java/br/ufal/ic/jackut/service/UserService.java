@@ -1,6 +1,9 @@
 package br.ufal.ic.jackut.service;
 
+import java.util.UUID;
+
 import br.ufal.ic.jackut.exception.user.AlreadyUserException;
+import br.ufal.ic.jackut.exception.user.AttributeNotFillException;
 import br.ufal.ic.jackut.exception.user.InvalidPasswordException;
 import br.ufal.ic.jackut.exception.user.InvalidSessionException;
 import br.ufal.ic.jackut.exception.user.InvalidUsernameException;
@@ -27,14 +30,14 @@ public class UserService {
             .orElseThrow(UserNotFoundException::new);
     }
 
-    public String getAtributeByLogin(String login, String attribute) throws UserNotFoundException {
-        User user = this.getUserByLogin(login);
+    public String getAtributeByUsername(String username, String attribute) throws UserNotFoundException, AttributeNotFillException {
+        User user = this.getUserByLogin(username);
         
-        return switch (attribute.toLowerCase()) {
-            case "nome" -> user.getName();
-            case "senha" -> user.getPassword();
-            default -> throw new IllegalArgumentException("Atributo inválido: " + attribute);
-        };
+        if(user.getAttribute(attribute) == null) {
+            throw new AttributeNotFillException();
+        }
+
+        return user.getAttribute(attribute);
     }
 
     public void createUser(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException {
@@ -50,12 +53,13 @@ public class UserService {
             throw new AlreadyUserException();
         }
         
-        User user = new User(username, password, name);
+        String id = UUID.randomUUID().toString();
+        User user = new User(username, password, name, id);
+
         this.userRepository.addUser(user);
     }
 
     public String openSession(String username, String password) throws InvalidSessionException {
-        
         if(username == null || username.isEmpty() || password == null || password.isEmpty()) {
             throw new InvalidSessionException();
         }
@@ -66,13 +70,30 @@ public class UserService {
                 throw new InvalidSessionException();
             }
 
-            return user.getName();
+            return user.getId();
         } catch (Exception e) {
             throw new InvalidSessionException();
         }
-      
+    }
 
+    public User getUserById(String id) throws UserNotFoundException {
+        return this.userRepository.getUserList()
+            .stream()
+            .filter(e -> e.getId().equals(id))
+            .findFirst()
+            .orElseThrow(UserNotFoundException::new);
+    }
+
+
+    public void editProfile(String id, String attribute, String value) throws UserNotFoundException {
+        User record = this.getUserById(id);
+        record.setAttribute(attribute, value);
         
+        this.updateUser(record);
+    }
+
+    private void updateUser(User modifiedUser) {
+        this.userRepository.updateUser(modifiedUser);
     }
 
     private boolean hasUser(String username) {

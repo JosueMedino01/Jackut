@@ -47,5 +47,24 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
+
+    public void updateUser(User modifiedUser) {
+        List<User> currentUsers = getUserList();
+        
+        for (int i = 0; i < currentUsers.size(); i++) {
+            User existingUser = currentUsers.get(i);
+            if (existingUser.getId().equals(modifiedUser.getId())) {
+                
+                currentUsers.set(i, modifiedUser); // substitui pelo novo
+                break;
+            }
+        }
+    
+        try (FileWriter writer = new FileWriter(this.pathDB)) {
+            gson.toJson(currentUsers, writer); // salva a lista atualizada
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
 }
