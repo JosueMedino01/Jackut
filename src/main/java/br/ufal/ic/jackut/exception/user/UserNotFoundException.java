@@ -1,8 +1,8 @@
 package br.ufal.ic.jackut.exception.user;
 
 public class UserNotFoundException extends Exception {
-    UserNotFoundException() {
-        super();
+    public UserNotFoundException() {
+        super("Usuário não cadastrado.");
     }
 
     @Override

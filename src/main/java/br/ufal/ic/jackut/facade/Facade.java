@@ -1,5 +1,10 @@
 package br.ufal.ic.jackut.facade;
 
+import br.ufal.ic.jackut.exception.user.AlreadyUserException;
+import br.ufal.ic.jackut.exception.user.InvalidPasswordException;
+import br.ufal.ic.jackut.exception.user.InvalidSessionException;
+import br.ufal.ic.jackut.exception.user.InvalidUsernameException;
+import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.service.UserService;
 
 public class Facade {
@@ -13,7 +18,19 @@ public class Facade {
         this.userService.CleanUp();
     }
 
-    public String getAtributoUsuario(String login, String atributo) {
-        throw new RuntimeException("Usuário não cadastrado.");
+    public String getAtributoUsuario(String username, String attribute) throws UserNotFoundException{
+        return this.userService.getUserByLogin(username).getName();
+    }
+
+    public void criarUsuario(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException {
+        this.userService.createUser(username, password, name);
+    }
+
+    public String abrirSessao(String username, String password) throws InvalidSessionException {
+        return this.userService.openSession(username, password);
+    }
+
+    public void encerrarSistema() {
+
     }
 }
