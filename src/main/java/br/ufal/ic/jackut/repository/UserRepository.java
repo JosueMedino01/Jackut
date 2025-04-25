@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import br.ufal.ic.jackut.model.User;
 
 public class UserRepository {
-    private final String pathDB = "./database.json";
+    private final String pathDB = "./src/main/java/br/ufal/ic/jackut/database/UserDB.json";
     private final Gson gson;
 
     public UserRepository() {

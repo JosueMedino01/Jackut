@@ -1,18 +1,24 @@
 package br.ufal.ic.jackut.facade;
 
+import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
 import br.ufal.ic.jackut.exception.user.AlreadyUserException;
 import br.ufal.ic.jackut.exception.user.AttributeNotFillException;
 import br.ufal.ic.jackut.exception.user.InvalidPasswordException;
 import br.ufal.ic.jackut.exception.user.InvalidSessionException;
 import br.ufal.ic.jackut.exception.user.InvalidUsernameException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
+import br.ufal.ic.jackut.model.Friendship;
+import br.ufal.ic.jackut.service.FriendshipService;
 import br.ufal.ic.jackut.service.UserService;
 
-public class Facade {
+public class UserFacade {
     private final UserService userService;
+    private final FriendshipService friendshipService;
 
-    public Facade() {
+    public UserFacade() {
         this.userService = new UserService();
+        this.friendshipService = new FriendshipService();
     }
 
     public void zerarSistema(){
@@ -35,6 +41,13 @@ public class Facade {
         this.userService.editProfile(id, attribute, value);
     }
 
+    public boolean ehAmigo(String username, String friend) throws UserNotFoundException {
+        return this.friendshipService.isFriend(username, friend);
+    }
+
+    public void adicionarAmigo(String id, String friendUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException{
+        this.friendshipService.addFriend(id, friendUsername);
+    }
     public void encerrarSistema() {
 
     }
