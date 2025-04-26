@@ -49,6 +49,6 @@ public class UserFacade {
         this.friendshipService.addFriend(id, friendUsername);
     }
     public void encerrarSistema() {
-
+        
     }
 }
