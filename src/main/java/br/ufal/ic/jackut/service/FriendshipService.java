@@ -5,6 +5,7 @@ import java.util.List;
 
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
 import br.ufal.ic.jackut.repository.FriendshipRepository;
@@ -30,8 +31,15 @@ public class FriendshipService {
         return this.isFriendByIds(usernameID, friendID);
     }
 
-    public void addFriend(String requesterId, String receiverUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException {
+    public void addFriend(String requesterId, String receiverUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
         String receiverId = this.userService.getUserByLogin(receiverUsername).getId();
+        
+        /* Melhorar melhor a validação de usuário já cadastrado */
+        this.userService.getUserById(requesterId).getId();
+
+        if(requesterId.equals(receiverId)) {
+            throw new SelfFriendshipException();
+        }
 
         if(isFriendByIds(requesterId, receiverId)) {
             throw new RegisteredFriendshipException();
@@ -63,6 +71,13 @@ public class FriendshipService {
     
         this.friendshipRepository.saveFriendshipData(data);
     }
+    
+    public String getFriends(String username) throws UserNotFoundException{
+        String id = this.userService.getUserByLogin(username).getId();
+        List<String> friendsIdList = getFriendsById(id);
+        
+        return formattedFriendList(friendsIdList);
+    }
 
     private List<String> getFriendsById(String id) {
         return this.friendshipRepository.getFriendshipData().getFriendships().get(id);
@@ -83,7 +98,7 @@ public class FriendshipService {
 
     private void addInvite(String requesterId, String receiverId) {
         Friendship friendship = this.friendshipRepository.getFriendshipData();
-        System.out.println("requesterId:" + requesterId + " receiverId: "+ receiverId);
+
         
         friendship.getInvites().putIfAbsent(receiverId, new ArrayList<>());
         friendship.getInvites().get(receiverId).add(requesterId);
@@ -117,23 +132,21 @@ public class FriendshipService {
         return invites.contains(requesterId);
     }
 
+    private String formattedFriendList(List<String> friendList) throws UserNotFoundException {
+        if (friendList == null) return "{}";
+
+        friendList = friendList.stream().map((String e) -> {
+            try {
+                String username = this.userService.getUserById(e).getUsername();
+                e = username;
+            } 
+            catch (UserNotFoundException ex) {
+                throw new RuntimeException("User not found for ID: " + e, ex);
+            } 
+            return e;
+        }).toList();
+
+        return friendList.toString().replace("[", "{").replace("]", "}").replace(" ", "");
+    }
+
 }
-
-/*   
-
-    public void addInvite(String id, String friendId) {
-        this.invites.putIfAbsent(friendId, new ArrayList<>());
-        this.invites.get(friendId).add(id);
-    }
-
-    public void dellInvite(String id, String friendId) {
-        this.invites.get(friendId).remove(id);
-    }
-
-    public void addFriend(String a, String b) {
-        this.friendships.putIfAbsent(a, new ArrayList<>());
-        this.friendships.get(a).add(b);
-
-        this.friendships.putIfAbsent(b, new ArrayList<>());
-        this.friendships.get(b).add(a);
-    } */

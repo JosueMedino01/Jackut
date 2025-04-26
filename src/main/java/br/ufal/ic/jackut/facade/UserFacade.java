@@ -1,7 +1,11 @@
 package br.ufal.ic.jackut.facade;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
 import br.ufal.ic.jackut.exception.user.AlreadyUserException;
 import br.ufal.ic.jackut.exception.user.AttributeNotFillException;
 import br.ufal.ic.jackut.exception.user.InvalidPasswordException;
@@ -45,9 +49,14 @@ public class UserFacade {
         return this.friendshipService.isFriend(username, friend);
     }
 
-    public void adicionarAmigo(String id, String friendUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException{
+    public void adicionarAmigo(String id, String friendUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
         this.friendshipService.addFriend(id, friendUsername);
     }
+
+    public String getAmigos(String username) throws UserNotFoundException {
+        return this.friendshipService.getFriends(username);
+    }
+
     public void encerrarSistema() {
         
     }
