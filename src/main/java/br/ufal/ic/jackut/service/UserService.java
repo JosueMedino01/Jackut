@@ -92,6 +92,20 @@ public class UserService {
         this.updateUser(record);
     }
 
+    public boolean isRegistered(String idOrUsername) throws UserNotFoundException{
+        try {
+            if (this.isUUID(idOrUsername)) {
+                this.getUserById(idOrUsername);
+            } else {
+                this.getUserByLogin(idOrUsername);
+            }
+            return true;
+        } catch (UserNotFoundException e) {
+            return false;
+        }
+        
+    }
+
     private void updateUser(User modifiedUser) {
         this.userRepository.updateUser(modifiedUser);
     }
@@ -103,5 +117,9 @@ public class UserService {
         } catch (UserNotFoundException e) {
             return false;
         }
+    }
+
+    private boolean isUUID(String value) {
+        return value != null && value.length() == 36 && value.contains("-");
     }
 }

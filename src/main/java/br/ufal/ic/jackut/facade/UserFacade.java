@@ -6,6 +6,8 @@ import java.util.List;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
+import br.ufal.ic.jackut.exception.message.MessageIsEmptyException;
+import br.ufal.ic.jackut.exception.message.SelfMessageException;
 import br.ufal.ic.jackut.exception.user.AlreadyUserException;
 import br.ufal.ic.jackut.exception.user.AttributeNotFillException;
 import br.ufal.ic.jackut.exception.user.InvalidPasswordException;
@@ -14,15 +16,18 @@ import br.ufal.ic.jackut.exception.user.InvalidUsernameException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
 import br.ufal.ic.jackut.service.FriendshipService;
+import br.ufal.ic.jackut.service.MessageService;
 import br.ufal.ic.jackut.service.UserService;
 
 public class UserFacade {
     private final UserService userService;
     private final FriendshipService friendshipService;
+    private final MessageService messageService;
 
     public UserFacade() {
         this.userService = new UserService();
         this.friendshipService = new FriendshipService();
+        this.messageService = new MessageService();
     }
 
     public void zerarSistema(){
@@ -55,6 +60,14 @@ public class UserFacade {
 
     public String getAmigos(String username) throws UserNotFoundException {
         return this.friendshipService.getFriends(username);
+    }
+
+    public void enviarRecado(String broadcasterId, String receptorUsername, String message) throws UserNotFoundException, SelfMessageException {
+        this.messageService.sendMessage(broadcasterId, receptorUsername, message);
+    }
+
+    public String lerRecado(String userId) throws MessageIsEmptyException {
+        return this.messageService.readMessage(userId);
     }
 
     public void encerrarSistema() {
