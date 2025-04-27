@@ -22,6 +22,10 @@ public class MessageRepository {
         this.gson = new Gson();
     }
 
+    /**
+     * Método responsável por salvar o Hash de mensagens
+     * @param messageData Entidade que representa o Hash que armazena a Fila (Queue) das mensagens
+     */
     public void save(MessageData messageData) {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             this.gson.toJson(messageData, writer);
@@ -31,6 +35,9 @@ public class MessageRepository {
         }
     }
 
+    /*
+     * Método responsável por retornar o Hash que armazena a Fila (Queue) das mensagens
+     */
     public MessageData get() {
         try (FileReader reader = new FileReader(this.pathDB)) {
             MessageData data =  this.gson.fromJson(reader, MessageData.class);
@@ -42,7 +49,9 @@ public class MessageRepository {
             return new MessageData();
         }
     }
-
+    /**
+     * Método responsável por limpar o arquivo de persistência de dados
+     */
     public void cleanUp() {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             MessageData empty = new MessageData();

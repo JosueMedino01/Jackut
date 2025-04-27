@@ -31,7 +31,9 @@ public class UserFacade {
     }
 
     public void zerarSistema(){
-        this.userService.CleanUp();
+        this.userService.cleanUP();
+        this.friendshipService.cleanUp();
+        this.messageService.cleanUp();
     }
 
     public String getAtributoUsuario(String username, String attribute) throws UserNotFoundException, AttributeNotFillException{

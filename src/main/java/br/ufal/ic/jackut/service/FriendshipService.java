@@ -19,6 +19,12 @@ public class FriendshipService {
         this.friendshipRepository = new FriendshipRepository();
         this.userService = new UserService();
     }
+    /**
+     * Método utilizado para limpar o arquivo de persistência de dados do usuário
+     */
+    public void cleanUp() {
+        this.friendshipRepository.cleanUp();
+    }
 
     /**
      * Método usado para carregar as informações dos usuários cadastrados
@@ -56,8 +62,8 @@ public class FriendshipService {
     public void addFriend(String requesterId, String receiverUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
         String receiverId = this.userService.getUserByLogin(receiverUsername).getId();
         
-        /* Melhorar melhor a validação de usuário já cadastrado */
-        this.userService.isRegistered(receiverUsername);
+        /* Melhorar forma de retornar exceção para validar se usuário já está cadastrado */
+        this.userService.getUserById(requesterId);
 
         if(requesterId.equals(receiverId)) {
             throw new SelfFriendshipException();

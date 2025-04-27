@@ -21,7 +21,13 @@ public class MessageService {
         this.userService = new UserService();
         this.data = this.messageRepository.get();
     }
-
+    /**
+     * Método utilizado para limpar o arquivo de persistência de dados do usuário
+     */
+    public void cleanUp() {
+        this.messageRepository.cleanUp();
+    }
+    
     /**
      * Método responsável por enviar mensagem ao usuário destinatário
      * @param broadcasterId ID do usuário que enviar/emite a mensagem 

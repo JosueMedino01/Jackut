@@ -21,8 +21,8 @@ public class UserService {
     /**
      * Método utilizado para limpar o arquivo de persistência de dados do usuário
      */
-    public void CleanUp() {
-        this.userRepository.CleanUp();
+    public void cleanUP() {
+        this.userRepository.cleanUP();
     }
 
     /**

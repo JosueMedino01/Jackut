@@ -16,6 +16,9 @@ public class FriendshipRepository {
         this.gson = new Gson();
     }
 
+    /**
+     * Método responsável por limpar o arquivo de persistência de dados
+     */
     public void cleanUp() {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             Friendship empty = new Friendship();
@@ -25,6 +28,10 @@ public class FriendshipRepository {
         }
     }
 
+    /**
+     * Método responsável por carregar a tabela de amizades
+     * @return Retornar uma instância de Friendship, classe gerencia as amizades existentes
+     */
     public Friendship getFriendshipData() {
         try (FileReader reader = new FileReader(this.pathDB)) {
             return this.gson.fromJson(reader, Friendship.class);
@@ -35,6 +42,10 @@ public class FriendshipRepository {
         }
     }
 
+    /**
+     * Método responsalver por salvar a tabela de amizades
+     * @param friendship Entidade que gerencia as amizades
+     */
     public void saveFriendshipData(Friendship friendship) {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             this.gson.toJson(friendship, writer);

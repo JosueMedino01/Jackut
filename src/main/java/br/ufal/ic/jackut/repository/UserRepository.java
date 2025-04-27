@@ -19,7 +19,10 @@ public class UserRepository {
         this.gson = new Gson();
     }
 
-    public void CleanUp() {
+    /**
+     * Método responsável por limpar o arquivo de persistência de dados
+     */
+    public void cleanUP() {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             this.gson.toJson(new Object[] {}, writer);
         } catch (IOException e) {
@@ -27,6 +30,10 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Método responsável por carregar a listagem de usuários
+     * @return Retorna uma lista de usuários
+     */
     public List<User> getUserList() {
         try (FileReader reader = new FileReader(this.pathDB)) {
             Type listType = new TypeToken<List<User>>() {}.getType();
@@ -37,6 +44,10 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Método responsável por adicionar um novo usuário no arquivo de persistência
+     * @param newUser Instância de um usuário
+     */
     public void addUser(User newUser) {
         List<User> currentUsers = getUserList(); // lê os usuários existentes
         currentUsers.add(newUser);              // adiciona o novo usuário
@@ -48,6 +59,10 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Método responsável por editar um usuário cadastrado
+     * @param modifiedUser Instância do usuário cadastrado
+     */
     public void updateUser(User modifiedUser) {
         List<User> currentUsers = getUserList();
         
