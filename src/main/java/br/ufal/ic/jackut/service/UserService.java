@@ -17,11 +17,20 @@ public class UserService {
     public UserService() {
         this.userRepository = new UserRepository();
     }
-
+    
+    /**
+     * Método utilizado para limpar o arquivo de persistência de dados do usuário
+     */
     public void CleanUp() {
         this.userRepository.CleanUp();
     }
 
+    /**
+     * Método utilizado para trazer as informações do usuário pelo Login/Username
+     * @param username Login/Username cadastrado pelo usuário
+     * @return Retorna a classe de usuário referente ao Login/Username informado
+     * @throws UserNotFoundException Caso seja informado um Login/Username não cadastrado, retorna uma Exception
+     */
     public User getUserByLogin(String username) throws UserNotFoundException {
         return this.userRepository.getUserList()
             .stream()
@@ -30,6 +39,14 @@ public class UserService {
             .orElseThrow(UserNotFoundException::new);
     }
 
+    /**
+     * Método utilizado para retornar um atributo pelo Login/Username do usuário
+     * @param username Login/Username cadastrado pelo usuário
+     * @param attribute Um atributo qualquer referente ao usuário
+     * @return  Retorna o atributo passado referente ao usuário informado
+     * @throws UserNotFoundException Em caso do usuário não estiver cadastrado, é retornado uma exceção
+     * @throws AttributeNotFillException Caso o atributo passado não tenha sido preenchido, é retornado uma exceção 
+     */
     public String getAtributeByUsername(String username, String attribute) throws UserNotFoundException, AttributeNotFillException {
         User user = this.getUserByLogin(username);
         
@@ -40,7 +57,16 @@ public class UserService {
         return user.getAttribute(attribute);
     }
 
-    public void createUser(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException {
+    /**
+     * Cria uma nova conta no sistema
+     * @param username Login/Username do usuário
+     * @param password Senha do usuário
+     * @param name Nome do usuário
+     * @throws AlreadyUserException Caso o Username/Login já estiver cadastrado
+     * @throws InvalidUsernameException Caso o Username/Login seja vazio
+     * @throws InvalidPasswordException Caso a senha seja vazia
+     */
+    public void createUser(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException, UserNotFoundException {
         if(username == null || username.isEmpty()) {
             throw new InvalidUsernameException();
         }
@@ -49,7 +75,7 @@ public class UserService {
             throw new InvalidPasswordException();
         }
         
-        if(this.hasUser(username)) {
+        if(this.isRegistered(username)) {
             throw new AlreadyUserException();
         }
         
@@ -59,6 +85,13 @@ public class UserService {
         this.userRepository.addUser(user);
     }
 
+    /**
+     * Método abre uma sessão para um usuário
+     * @param username Login do usuário
+     * @param password Senha do usuário
+     * @return Retorna o ID referente ao usuário
+     * @throws InvalidSessionException Caso login ou senha inválidos
+     */
     public String openSession(String username, String password) throws InvalidSessionException {
         if(username == null || username.isEmpty() || password == null || password.isEmpty()) {
             throw new InvalidSessionException();
@@ -76,6 +109,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Método utilizado para trazer as informações do usuário pelo ID
+     * @param id ID do usuário
+     * @return Retorna a classe de usuário referente ao ID informado
+     * @throws UserNotFoundException
+     */
     public User getUserById(String id) throws UserNotFoundException {
         return this.userRepository.getUserList()
             .stream()
@@ -84,7 +123,13 @@ public class UserService {
             .orElseThrow(UserNotFoundException::new);
     }
 
-
+    /**
+     * Método edita um atributo do usuário
+     * @param id ID do usuário
+     * @param attribute Atributo a ser editado pelo usuário
+     * @param value Novo valor do atributo
+     * @throws UserNotFoundException Caso o usuário não esteja registrado
+     */
     public void editProfile(String id, String attribute, String value) throws UserNotFoundException {
         User record = this.getUserById(id);
         record.setAttribute(attribute, value);
@@ -92,6 +137,12 @@ public class UserService {
         this.updateUser(record);
     }
 
+    /**
+     * Método para saber se um usuário está cadastrado no sistema
+     * @param idOrUsername ID ou Login do usuário
+     * @return Retorna um boleano TRUE caso o usuário esteja cadastrado, caso contrário FALSE
+     * @throws UserNotFoundException Caso o ID passado não esteja registrado
+     */
     public boolean isRegistered(String idOrUsername) throws UserNotFoundException{
         try {
             if (this.isUUID(idOrUsername)) {
@@ -106,19 +157,19 @@ public class UserService {
         
     }
 
+    /**
+     * Método usado para editar o usuário no arquivo de persistência
+     * @param modifiedUser Login/Username do usuário modificado
+     */
     private void updateUser(User modifiedUser) {
         this.userRepository.updateUser(modifiedUser);
     }
 
-    private boolean hasUser(String username) {
-        try {
-            this.getUserByLogin(username);
-            return true;
-        } catch (UserNotFoundException e) {
-            return false;
-        }
-    }
-
+    /**
+     * Método usado para saber se uma string é um UUID
+     * @param value String a ser verificada
+     * @return Retorna TRUE se a string for um UUID, e FALSE caso contrário
+     */
     private boolean isUUID(String value) {
         return value != null && value.length() == 36 && value.contains("-");
     }

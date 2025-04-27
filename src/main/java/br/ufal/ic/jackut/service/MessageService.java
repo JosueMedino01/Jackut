@@ -22,6 +22,14 @@ public class MessageService {
         this.data = this.messageRepository.get();
     }
 
+    /**
+     * Método responsável por enviar mensagem ao usuário destinatário
+     * @param broadcasterId ID do usuário que enviar/emite a mensagem 
+     * @param receptorUsername ID do usuário que recebe/recepta a mensagem
+     * @param message Mensagem enviada
+     * @throws UserNotFoundException Caso um dos IDs informados não esteja cadastrado no sistema
+     * @throws SelfMessageException Caso o usuário tenha enviado uma mensagem para ele mesmo
+     */
     public void sendMessage(String broadcasterId, String receptorUsername, String message) throws UserNotFoundException, SelfMessageException{
         String receptorId = this.userService.getUserByLogin(receptorUsername).getId();
         
@@ -42,6 +50,12 @@ public class MessageService {
         this.onSave();
     }
 
+    /**
+     * Método responsável por carregar a mensagem mais antiga e remover ela da listagem
+     * @param id ID do usuário que vai ler as mensagens
+     * @return Retorna a mensagem mais antiga
+     * @throws MessageIsEmptyException Caso a caixa de mensagens esteja vazia
+     */
     public String readMessage(String id) throws MessageIsEmptyException{
         Message msg = this.data.getTableMessage().get(id).poll();
 

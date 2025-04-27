@@ -38,7 +38,7 @@ public class UserFacade {
         return this.userService.getAtributeByUsername(username, attribute);
     }
 
-    public void criarUsuario(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException {
+    public void criarUsuario(String username, String password, String name) throws AlreadyUserException, InvalidUsernameException, InvalidPasswordException, UserNotFoundException {
         this.userService.createUser(username, password, name);
     }
 
