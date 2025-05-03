@@ -6,7 +6,7 @@ import easyaccept.EasyAccept;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        String userFacade =  "br.ufal.ic.jackut.facade.UserFacade";
+        String userFacade =  "br.ufal.ic.jackut.facade.Facade";
         String[] userUS= {
             "src/test/user-stories/us1_1.txt",
             "src/test/user-stories/us1_2.txt",
@@ -16,6 +16,8 @@ public class Main {
             "src/test/user-stories/us3_2.txt",
             "src/test/user-stories/us4_1.txt",
             "src/test/user-stories/us4_2.txt",
+            "src/test/user-stories/us5_1.txt",
+            "src/test/user-stories/us5_2.txt",
         };
         
         for(String storie : userUS) {

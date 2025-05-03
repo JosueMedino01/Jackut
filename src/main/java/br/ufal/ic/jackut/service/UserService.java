@@ -31,12 +31,12 @@ public class UserService {
      * @return Retorna a classe de usuário referente ao Login/Username informado
      * @throws UserNotFoundException Caso seja informado um Login/Username não cadastrado, retorna uma Exception
      */
-    public User getUserByLogin(String username) throws UserNotFoundException {
+    public User getUserByLogin(String username) {
         return this.userRepository.getUserList()
             .stream()
             .filter(e -> e.getUsername().equals(username))
             .findFirst()
-            .orElseThrow(UserNotFoundException::new);
+            .orElse(null);
     }
 
     /**
@@ -49,6 +49,9 @@ public class UserService {
      */
     public String getAtributeByUsername(String username, String attribute) throws UserNotFoundException, AttributeNotFillException {
         User user = this.getUserByLogin(username);
+
+        if (user == null) 
+            throw new UserNotFoundException();
         
         if(user.getAttribute(attribute) == null) {
             throw new AttributeNotFillException();
@@ -99,6 +102,9 @@ public class UserService {
         
         try {
             User user = this.getUserByLogin(username);
+            if (user == null) 
+                throw new UserNotFoundException();
+                
             if (!user.getPassword().equals(password)) {
                 throw new InvalidSessionException();
             }
@@ -115,12 +121,12 @@ public class UserService {
      * @return Retorna a classe de usuário referente ao ID informado
      * @throws UserNotFoundException
      */
-    public User getUserById(String id) throws UserNotFoundException {
+    public User getUserById(String id) {
         return this.userRepository.getUserList()
             .stream()
             .filter(e -> e.getId().equals(id))
             .findFirst()
-            .orElseThrow(UserNotFoundException::new);
+            .orElse(null);
     }
 
     /**
@@ -132,6 +138,10 @@ public class UserService {
      */
     public void editProfile(String id, String attribute, String value) throws UserNotFoundException {
         User record = this.getUserById(id);
+        
+        if (record == null ) 
+            throw new UserNotFoundException();
+
         record.setAttribute(attribute, value);
         
         this.updateUser(record);
@@ -143,18 +153,12 @@ public class UserService {
      * @return Retorna um boleano TRUE caso o usuário esteja cadastrado, caso contrário FALSE
      * @throws UserNotFoundException Caso o ID passado não esteja registrado
      */
-    public boolean isRegistered(String idOrUsername) throws UserNotFoundException{
-        try {
-            if (this.isUUID(idOrUsername)) {
-                this.getUserById(idOrUsername);
-            } else {
-                this.getUserByLogin(idOrUsername);
-            }
-            return true;
-        } catch (UserNotFoundException e) {
-            return false;
+    public boolean isRegistered(String idOrUsername){
+        if (this.isUUID(idOrUsername)) {
+            return (this.getUserById(idOrUsername) != null);
         }
-        
+         
+        return (this.getUserByLogin(idOrUsername) != null);
     }
 
     /**

@@ -42,6 +42,12 @@ public class FriendshipService {
      * @throws UserNotFoundException Caso algum Login/Username informado não esteja cadastrado
      */
     public boolean isFriend(String username, String friend) throws UserNotFoundException {
+        if (!this.userService.isRegistered(username) || 
+            !this.userService.isRegistered(friend)) 
+        {
+            throw new UserNotFoundException();
+        }
+
         String usernameID = this.userService.getUserByLogin(username).getId(); 
         String friendID = this.userService.getUserByLogin(friend).getId(); 
 
@@ -60,10 +66,13 @@ public class FriendshipService {
      * @throws SelfFriendshipException Caso seja os mesmos usuários na solicitação
      */
     public void addFriend(String requesterId, String receiverUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
-        String receiverId = this.userService.getUserByLogin(receiverUsername).getId();
+        if (!this.userService.isRegistered(receiverUsername)) throw new UserNotFoundException();
         
-        /* Melhorar forma de retornar exceção para validar se usuário já está cadastrado */
-        this.userService.getUserById(requesterId);
+        String receiverId = this.userService.getUserByLogin(receiverUsername).getId();
+
+        if (!this.userService.isRegistered(requesterId)) {
+            throw new UserNotFoundException();
+        }
 
         if(requesterId.equals(receiverId)) {
             throw new SelfFriendshipException();
@@ -111,6 +120,10 @@ public class FriendshipService {
      * @throws UserNotFoundException Caso o usuário não esteja cadastrado
      */
     public String getFriends(String username) throws UserNotFoundException{
+        if (!this.userService.isRegistered(username)) {
+            throw new UserNotFoundException();
+        }
+
         String id = this.userService.getUserByLogin(username).getId();
         List<String> friendsIdList = getFriendsById(id);
         
@@ -206,19 +219,15 @@ public class FriendshipService {
      * @return Retorna uma string com todos os IDs convertidos aos seus referidos nomes e separados por vírgula
      * @throws UserNotFoundException
      */
-    private String formattedFriendList(List<String> friendList) throws UserNotFoundException {
+    private String formattedFriendList(List<String> friendList) {
         if (friendList == null) return "{}";
 
-        friendList = friendList.stream().map((String e) -> {
-            try {
-                String username = this.userService.getUserById(e).getUsername();
-                e = username;
-            } 
-            catch (UserNotFoundException ex) {
-                throw new RuntimeException("User not found for ID: " + e, ex);
-            } 
-            return e;
-        }).toList();
+        friendList = friendList
+            .stream()
+            .map((String e) -> {
+                return this.userService.getUserById(e).getUsername();
+            })
+            .toList();
 
         return friendList.toString().replace("[", "{").replace("]", "}").replace(" ", "");
     }

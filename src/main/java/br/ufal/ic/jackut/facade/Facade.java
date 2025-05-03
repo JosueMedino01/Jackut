@@ -3,6 +3,8 @@ package br.ufal.ic.jackut.facade;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.ufal.ic.jackut.exception.community.CommunityNotFoundException;
+import br.ufal.ic.jackut.exception.community.RegisteredCommunityException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
@@ -15,25 +17,29 @@ import br.ufal.ic.jackut.exception.user.InvalidSessionException;
 import br.ufal.ic.jackut.exception.user.InvalidUsernameException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
+import br.ufal.ic.jackut.service.CommunityService;
 import br.ufal.ic.jackut.service.FriendshipService;
 import br.ufal.ic.jackut.service.MessageService;
 import br.ufal.ic.jackut.service.UserService;
 
-public class UserFacade {
+public class Facade {
     private final UserService userService;
     private final FriendshipService friendshipService;
     private final MessageService messageService;
+    private final CommunityService communityService;
 
-    public UserFacade() {
+    public Facade() {
         this.userService = new UserService();
         this.friendshipService = new FriendshipService();
         this.messageService = new MessageService();
+        this.communityService = new CommunityService();
     }
 
     public void zerarSistema(){
         this.userService.cleanUP();
         this.friendshipService.cleanUp();
         this.messageService.cleanUp();
+        this.communityService.cleanUp();
     }
 
     public String getAtributoUsuario(String username, String attribute) throws UserNotFoundException, AttributeNotFillException{
@@ -72,7 +78,22 @@ public class UserFacade {
         return this.messageService.readMessage(userId);
     }
 
+    public void criarComunidade(String createrID, String name, String description) throws RegisteredCommunityException {
+        this.communityService.createCommunity(createrID, name, description);
+    }
+
+    public String getDescricaoComunidade(String name) throws CommunityNotFoundException{
+        return this.communityService.getDescriptionByCommunityName(name);
+    }
+
+    public String getDonoComunidade(String name) throws CommunityNotFoundException{
+        return this.communityService.getOwner(name);
+    }
+
+    public String getMembrosComunidade(String name) throws CommunityNotFoundException {
+        return this.communityService.getMembers(name);
+    }
+
     public void encerrarSistema() {
-        
     }
 }

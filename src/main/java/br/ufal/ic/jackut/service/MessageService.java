@@ -37,6 +37,10 @@ public class MessageService {
      * @throws SelfMessageException Caso o usuário tenha enviado uma mensagem para ele mesmo
      */
     public void sendMessage(String broadcasterId, String receptorUsername, String message) throws UserNotFoundException, SelfMessageException{
+        if (!this.userService.isRegistered(receptorUsername)) {
+            throw new UserNotFoundException();
+        }
+
         String receptorId = this.userService.getUserByLogin(receptorUsername).getId();
         
         if(
