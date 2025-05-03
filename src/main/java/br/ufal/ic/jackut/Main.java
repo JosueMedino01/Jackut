@@ -18,6 +18,8 @@ public class Main {
             "src/test/user-stories/us4_2.txt",
             "src/test/user-stories/us5_1.txt",
             "src/test/user-stories/us5_2.txt",
+            "src/test/user-stories/us6_1.txt",
+            "src/test/user-stories/us6_2.txt",
         };
         
         for(String storie : userUS) {
