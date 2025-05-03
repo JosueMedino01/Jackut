@@ -1,22 +1,33 @@
 package br.ufal.ic.jackut.service;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import br.ufal.ic.jackut.exception.community.CommunityNotFoundException;
+import br.ufal.ic.jackut.exception.community.MessageNotFoundException;
 import br.ufal.ic.jackut.exception.community.RegisteredCommunityException;
 import br.ufal.ic.jackut.exception.community.UserAlreadyInCommunityException;
+import br.ufal.ic.jackut.exception.message.MessageIsEmptyException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Community;
+import br.ufal.ic.jackut.model.Message;
+import br.ufal.ic.jackut.model.MessageStore;
 import br.ufal.ic.jackut.repository.CommunityRepository;
+import br.ufal.ic.jackut.repository.MessageRepository;
 
 public class CommunityService {
     private CommunityRepository communityRepository;
     private UserService userService;
+    private MessageRepository messageRepository;
+    private MessageStore data;
 
     public CommunityService() {
         this.communityRepository = new CommunityRepository();
         this.userService = new UserService();
+        this.messageRepository = new MessageRepository();
+        this.data = this.messageRepository.get();
     }
     
     public void cleanUp() {
@@ -105,6 +116,39 @@ public class CommunityService {
         }
 
         throw new CommunityNotFoundException();
+    }
+
+    public String readMessage(String userId) throws MessageNotFoundException {
+        Queue<Message> queue = this.data.getCommunityMessages().get(userId);
+    
+        if (queue == null || queue.isEmpty()) {
+            throw new MessageNotFoundException();
+        }
+
+        Message msg = queue.poll();
+        this.messageRepository.save(this.data);
+
+        return msg.getMessage();
+    }
+
+    public void sendMessage(String userId, String communityName, String message) 
+        throws CommunityNotFoundException, UserNotFoundException 
+    {
+        if (!this.userService.isRegistered(userId))
+            throw new UserNotFoundException();
+       
+        Message msg = new Message(userId, communityName, message);
+        Community community = this.getCommunityByName(communityName);
+
+        if (community == null) 
+            throw new CommunityNotFoundException();
+        
+        for(String receptorId : community.getMembers()) {
+            this.data.getCommunityMessages().putIfAbsent(receptorId, new LinkedList<>());
+            this.data.getCommunityMessages().get(receptorId).add(msg);
+        }
+
+        this.messageRepository.save(this.data);
     }
 
     private Community getCommunityByName(String name) {

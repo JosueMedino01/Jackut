@@ -2,19 +2,21 @@ package br.ufal.ic.jackut.service;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Queue;
 
+import br.ufal.ic.jackut.exception.community.MessageNotFoundException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
 import br.ufal.ic.jackut.exception.message.MessageIsEmptyException;
 import br.ufal.ic.jackut.exception.message.SelfMessageException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Message;
-import br.ufal.ic.jackut.model.MessageData;
+import br.ufal.ic.jackut.model.MessageStore;
 import br.ufal.ic.jackut.repository.MessageRepository;
 
 public class MessageService {
     private MessageRepository messageRepository;
     private UserService userService;
-    private MessageData data;
+    private MessageStore data;
 
     public MessageService() {
         this.messageRepository = new MessageRepository();
@@ -55,8 +57,8 @@ public class MessageService {
         }
 
         Message msg = new Message(broadcasterId, receptorId, message);
-        this.data.getTableMessage().putIfAbsent(receptorId, new LinkedList<>());
-        this.data.getTableMessage().get(receptorId).add(msg);
+        this.data.getPrivateMessages().putIfAbsent(receptorId, new LinkedList<>());
+        this.data.getPrivateMessages().get(receptorId).add(msg);
         this.onSave();
     }
 
@@ -67,11 +69,13 @@ public class MessageService {
      * @throws MessageIsEmptyException Caso a caixa de mensagens esteja vazia
      */
     public String readMessage(String id) throws MessageIsEmptyException{
-        Message msg = this.data.getTableMessage().get(id).poll();
-
-        if(msg == null) {
+        Queue<Message> queue = this.data.getPrivateMessages().get(id);
+    
+        if (queue == null || queue.isEmpty()) {
             throw new MessageIsEmptyException();
         }
+        
+        Message msg = queue.poll(); 
         
         this.onSave();
 

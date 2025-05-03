@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufal.ic.jackut.exception.community.CommunityNotFoundException;
+import br.ufal.ic.jackut.exception.community.MessageNotFoundException;
 import br.ufal.ic.jackut.exception.community.RegisteredCommunityException;
 import br.ufal.ic.jackut.exception.community.UserAlreadyInCommunityException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
@@ -103,6 +104,16 @@ public class Facade {
         throws UserAlreadyInCommunityException, CommunityNotFoundException, UserNotFoundException 
     {
         this.communityService.addMember(userId, nameCommunity);
+    }
+
+    public String lerMensagem(String userId) throws MessageNotFoundException {
+        return this.communityService.readMessage(userId);
+    }
+
+    public void enviarMensagem(String userId, String community, String message) 
+        throws CommunityNotFoundException, UserNotFoundException 
+    {
+        this.communityService.sendMessage(userId, community, message);
     }
 
     public void encerrarSistema() {

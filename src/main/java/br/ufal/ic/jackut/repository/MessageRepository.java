@@ -2,7 +2,7 @@ package br.ufal.ic.jackut.repository;
 
 import br.ufal.ic.jackut.model.Friendship;
 import br.ufal.ic.jackut.model.Message;
-import br.ufal.ic.jackut.model.MessageData;
+import br.ufal.ic.jackut.model.MessageStore;
 
 import java.util.Queue;
 
@@ -26,7 +26,7 @@ public class MessageRepository {
      * Método responsável por salvar o Hash de mensagens
      * @param messageData Entidade que representa o Hash que armazena a Fila (Queue) das mensagens
      */
-    public void save(MessageData messageData) {
+    public void save(MessageStore messageData) {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
             this.gson.toJson(messageData, writer);
         } 
@@ -38,15 +38,15 @@ public class MessageRepository {
     /*
      * Método responsável por retornar o Hash que armazena a Fila (Queue) das mensagens
      */
-    public MessageData get() {
+    public MessageStore get() {
         try (FileReader reader = new FileReader(this.pathDB)) {
-            MessageData data =  this.gson.fromJson(reader, MessageData.class);
+            MessageStore data =  this.gson.fromJson(reader, MessageStore.class);
 
-            return (data == null) ? new MessageData() : data;
+            return (data == null) ? new MessageStore() : data;
         } 
         catch (IOException e) {
             e.printStackTrace();
-            return new MessageData();
+            return new MessageStore();
         }
     }
     /**
@@ -54,7 +54,7 @@ public class MessageRepository {
      */
     public void cleanUp() {
         try (FileWriter writer = new FileWriter(this.pathDB)) {
-            MessageData empty = new MessageData();
+            MessageStore empty = new MessageStore();
             this.gson.toJson(empty, writer);
         } catch (IOException e) {
             e.printStackTrace();
