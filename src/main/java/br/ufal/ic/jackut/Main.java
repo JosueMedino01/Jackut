@@ -23,9 +23,9 @@ public class Main {
             "src/test/user-stories/us7_1.txt",
             "src/test/user-stories/us7_2.txt",
             "src/test/user-stories/us8_1.txt",
-            /* "src/test/user-stories/us8_2.txt", */
-            /* "src/test/user-stories/us8_1.txt",
-            "src/test/user-stories/us8_2.txt", */
+            "src/test/user-stories/us8_2.txt",
+            "src/test/user-stories/us9_1.txt",
+            //"src/test/user-stories/us9_2.txt",
         };
         
         for(String storie : userUS) {

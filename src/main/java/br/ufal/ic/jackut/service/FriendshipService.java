@@ -2,11 +2,15 @@ package br.ufal.ic.jackut.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import br.ufal.ic.jackut.exception.friendship.EnemyBlockException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredEnemyException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFanException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfEnemyException;
 import br.ufal.ic.jackut.exception.friendship.SelfFanException;
 import br.ufal.ic.jackut.exception.friendship.SelfFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
@@ -14,6 +18,7 @@ import br.ufal.ic.jackut.exception.message.SelfMessageException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
 import br.ufal.ic.jackut.model.Message;
+import br.ufal.ic.jackut.model.MessageStore;
 import br.ufal.ic.jackut.model.User;
 import br.ufal.ic.jackut.repository.FriendshipRepository;
 
@@ -26,7 +31,7 @@ public class FriendshipService {
     public FriendshipService() {
         this.friendshipRepository = new FriendshipRepository();
         this.userService = new UserService();
-        this.messageService = new MessageService();
+        this.messageService = new MessageService(this);
     }
     /**
      * Método utilizado para limpar o arquivo de persistência de dados do usuário
@@ -74,33 +79,40 @@ public class FriendshipService {
      * @throws RegisteredFriendshipException Caso os usuários já sejam amigos
      * @throws SelfFriendshipException Caso seja os mesmos usuários na solicitação
      */
-    public void addFriend(String requesterId, String receiverUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
+    public void addFriend(String requesterId, String receiverUsername) 
+        throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, 
+        SelfFriendshipException, EnemyBlockException
+    {
         if (!this.userService.isRegistered(receiverUsername)) throw new UserNotFoundException();
         
-        String receiverId = this.userService.getUserByLogin(receiverUsername).getId();
+        User receiver = this.userService.getUserByLogin(receiverUsername);
 
         if (!this.userService.isRegistered(requesterId)) {
             throw new UserNotFoundException();
         }
 
-        if(requesterId.equals(receiverId)) {
+        if(this.isEnemy(receiver.getId(), requesterId, this.friendshipRepository.getFriendshipData().getEnemies())) {
+            throw new EnemyBlockException(receiver.getAttribute("nome"));
+        }
+
+        if(requesterId.equals(receiver.getId())) {
             throw new SelfFriendshipException();
         }
 
-        if(isFriendByIds(requesterId, receiverId)) {
+        if(isFriendByIds(requesterId, receiver.getId())) {
             throw new RegisteredFriendshipException();
         }
 
-        if(hasInviteByIds(requesterId, receiverId)) {
+        if(hasInviteByIds(requesterId, receiver.getId())) {
             throw new RegisteredInviteException();
         }
 
-        if(hasInviteByIds(receiverId, requesterId)) {
-           this.confirmFriendship(requesterId, receiverId);
+        if(hasInviteByIds(receiver.getId(), requesterId)) {
+           this.confirmFriendship(requesterId, receiver.getId());
            return;
         }
 
-        this.addInvite(requesterId, receiverId);
+        this.addInvite(requesterId, receiver.getId());
     }
     
     /**
@@ -158,7 +170,7 @@ public class FriendshipService {
     }
 
     public void addIdol(String userId, String idolName) 
-        throws RegisteredFanException, UserNotFoundException, SelfFanException
+        throws RegisteredFanException, UserNotFoundException, SelfFanException, EnemyBlockException
     {
         if (!this.userService.isRegistered(userId) || 
             !this.userService.isRegistered(idolName)) 
@@ -166,18 +178,25 @@ public class FriendshipService {
             throw new UserNotFoundException();
         }
 
-        String idolId = this.userService.getUserByLogin(idolName).getId();
+        
 
-        if (userId.equals(idolId))
+
+        User idol = this.userService.getUserByLogin(idolName);
+        
+        if(this.isEnemy(idol.getId(), userId, this.friendshipRepository.getFriendshipData().getEnemies())) {
+            throw new EnemyBlockException(idol.getAttribute("nome"));
+        }
+
+        if (userId.equals(idol.getId()))
             throw new SelfFanException();
         Friendship friendship = this.friendshipRepository.getFriendshipData();
 
-        friendship.getFans().putIfAbsent(idolId, new ArrayList<>());
+        friendship.getFans().putIfAbsent(idol.getId(), new ArrayList<>());
 
-        if( friendship.getFans().get(idolId).contains(userId))
+        if( friendship.getFans().get(idol.getId()).contains(userId))
             throw new RegisteredFanException();
 
-        friendship.getFans().get(idolId).add(userId);
+        friendship.getFans().get(idol.getId()).add(userId);
 
         this.friendshipRepository.saveFriendshipData(friendship);
     }
@@ -203,7 +222,7 @@ public class FriendshipService {
     }
 
     public void addFlirting(String userId, String flirtingName) 
-        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException
+        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException, EnemyBlockException
     {
 
         if (!this.userService.isRegistered(userId) || 
@@ -213,6 +232,10 @@ public class FriendshipService {
         }
         
         User flirting = this.userService.getUserByLogin(flirtingName);
+
+        if(this.isEnemy(flirting.getId(), userId, this.friendshipRepository.getFriendshipData().getEnemies())) {
+            throw new EnemyBlockException(flirting.getAttribute("nome"));
+        }
 
         if(flirting.getId().equals(userId)) 
             throw new SelfFlirtingException();
@@ -238,6 +261,34 @@ public class FriendshipService {
             this.messageService.sendMessage("system", flirting.getUsername(), msgToFliting );
             
         }
+
+        this.friendshipRepository.saveFriendshipData(friendship);
+    }
+
+    public void addEnemy(String userId, String enemyUsername) 
+        throws UserNotFoundException, RegisteredEnemyException, SelfEnemyException
+    {
+        if (!this.userService.isRegistered(userId) || !this.userService.isRegistered(enemyUsername)) {
+            throw new UserNotFoundException();
+        }
+
+        User enemy = this.userService.getUserByLogin(enemyUsername);
+        Friendship friendship = this.friendshipRepository.getFriendshipData();
+
+        if(this.isEnemy(userId, enemy.getId(), friendship.getEnemies())) {
+            throw new RegisteredEnemyException();
+        }
+
+        if(enemy.getId().equals(userId)) {
+            throw new SelfEnemyException();
+        }
+
+       
+       
+
+        friendship.getEnemies().putIfAbsent(userId, new ArrayList<>());
+        friendship.getEnemies().get(userId).add(enemy.getId());
+
 
         this.friendshipRepository.saveFriendshipData(friendship);
     }
@@ -292,7 +343,6 @@ public class FriendshipService {
      */
     private void addInvite(String requesterId, String receiverId) {
         Friendship friendship = this.friendshipRepository.getFriendshipData();
-
         
         friendship.getInvites().putIfAbsent(receiverId, new ArrayList<>());
         friendship.getInvites().get(receiverId).add(requesterId);
@@ -354,5 +404,11 @@ public class FriendshipService {
             .toList();
 
         return list.toString().replace("[", "{").replace("]", "}").replace(" ", "");
+    }
+
+    public boolean isEnemy(String userId, String enemyId, Map<String, List<String>> data){
+        return (data == null) 
+                    ? false 
+                    : data.get(userId) != null && data.get(userId).contains(enemyId);
     }
 }

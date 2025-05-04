@@ -9,12 +9,14 @@ public class Friendship {
     private Map<String, List<String>> invites;
     private Map<String, List<String>> fans;
     private Map<String, List<String>> flirtingMap;
+    private Map<String, List<String>> enemies;
 
     public Friendship() {
         this.friendships = new HashMap<>();
         this.invites = new HashMap<>();
         this.fans = new HashMap<>();
         this.flirtingMap = new HashMap<>();
+        this.enemies = new HashMap<>();
     }
 
     public Map<String, List<String>> getFriendships() {
@@ -47,5 +49,13 @@ public class Friendship {
 
     public void setFlirtingMap(Map<String, List<String>> flirtingMap) {
         this.flirtingMap = flirtingMap;
+    }
+
+    public Map<String, List<String>> getEnemies() {
+        return enemies;
+    }
+
+    public void setEnemies(Map<String, List<String>> enemies) {
+        this.enemies = enemies;
     }
 }

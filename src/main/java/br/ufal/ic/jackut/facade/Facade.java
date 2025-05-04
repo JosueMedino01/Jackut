@@ -7,10 +7,13 @@ import br.ufal.ic.jackut.exception.community.CommunityNotFoundException;
 import br.ufal.ic.jackut.exception.community.MessageNotFoundException;
 import br.ufal.ic.jackut.exception.community.RegisteredCommunityException;
 import br.ufal.ic.jackut.exception.community.UserAlreadyInCommunityException;
+import br.ufal.ic.jackut.exception.friendship.EnemyBlockException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredEnemyException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFanException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfEnemyException;
 import br.ufal.ic.jackut.exception.friendship.SelfFanException;
 import br.ufal.ic.jackut.exception.friendship.SelfFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
@@ -37,7 +40,7 @@ public class Facade {
     public Facade() {
         this.userService = new UserService();
         this.friendshipService = new FriendshipService();
-        this.messageService = new MessageService();
+        this.messageService = new MessageService(this.friendshipService);
         this.communityService = new CommunityService();
     }
 
@@ -68,7 +71,10 @@ public class Facade {
         return this.friendshipService.isFriend(username, friend);
     }
 
-    public void adicionarAmigo(String id, String friendUsername) throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, SelfFriendshipException {
+    public void adicionarAmigo(String id, String friendUsername) 
+        throws UserNotFoundException, RegisteredInviteException, RegisteredFriendshipException, 
+        SelfFriendshipException, EnemyBlockException
+    {
         this.friendshipService.addFriend(id, friendUsername);
     }
 
@@ -76,7 +82,9 @@ public class Facade {
         return this.friendshipService.getFriends(username);
     }
 
-    public void enviarRecado(String broadcasterId, String receptorUsername, String message) throws UserNotFoundException, SelfMessageException {
+    public void enviarRecado(String broadcasterId, String receptorUsername, String message) 
+        throws UserNotFoundException, SelfMessageException, EnemyBlockException
+    {
         this.messageService.sendMessage(broadcasterId, receptorUsername, message);
     }
 
@@ -125,7 +133,7 @@ public class Facade {
     }
 
     public void adicionarIdolo(String userId, String idolName) 
-        throws RegisteredFanException, UserNotFoundException, SelfFanException
+        throws RegisteredFanException, UserNotFoundException, SelfFanException, EnemyBlockException
     {
         this.friendshipService.addIdol(userId, idolName);
     }
@@ -141,13 +149,19 @@ public class Facade {
     }
     
     public void adicionarPaquera(String userId, String flirtingName) 
-        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException
+        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException, EnemyBlockException
     {
         this.friendshipService.addFlirting(userId, flirtingName);
     }
     
     public String getPaqueras(String userId) {
         return this.friendshipService.getFlirting(userId);
+    }
+
+    public void adicionarInimigo(String userId, String enemyUsername) 
+        throws UserNotFoundException, RegisteredEnemyException, SelfEnemyException
+    {
+        this.friendshipService.addEnemy(userId, enemyUsername);
     }
 
     public void encerrarSistema() {

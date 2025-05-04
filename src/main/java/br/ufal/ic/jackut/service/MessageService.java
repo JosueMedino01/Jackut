@@ -4,20 +4,24 @@ package br.ufal.ic.jackut.service;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import br.ufal.ic.jackut.exception.friendship.EnemyBlockException;
 import br.ufal.ic.jackut.exception.message.MessageIsEmptyException;
 import br.ufal.ic.jackut.exception.message.SelfMessageException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Message;
 import br.ufal.ic.jackut.model.MessageStore;
+import br.ufal.ic.jackut.model.User;
 import br.ufal.ic.jackut.repository.MessageRepository;
 
 public class MessageService {
     private MessageRepository messageRepository;
     private UserService userService;
+    private FriendshipService friendshipService;
 
-    public MessageService() {
+    public MessageService(FriendshipService friendshipService) {
         this.messageRepository = new MessageRepository();
         this.userService = new UserService();
+        this.friendshipService = friendshipService;
     }
     /**
      * Método utilizado para limpar o arquivo de persistência de dados do usuário
@@ -35,32 +39,36 @@ public class MessageService {
      * @throws SelfMessageException Caso o usuário tenha enviado uma mensagem para ele mesmo
      */
     public void sendMessage(String broadcasterId, String receptorUsername, String message) 
-        throws UserNotFoundException, SelfMessageException
+        throws UserNotFoundException, SelfMessageException, EnemyBlockException
     {
         if (!this.userService.isRegistered(receptorUsername)) {
             throw new UserNotFoundException();
         }
+        
+        User receptor= this.userService.getUserByLogin(receptorUsername);
 
-        String receptorId = this.userService.getUserByLogin(receptorUsername).getId();
+        if(this.friendshipService.isEnemy(receptor.getId(), broadcasterId, this.friendshipService.getFriendshipData().getEnemies())) {
+            throw new EnemyBlockException(receptor.getAttribute("nome"));
+        }
 
         if(!broadcasterId.equals("system")) {
             if(
                 !this.userService.isRegistered(broadcasterId) || 
-                !this.userService.isRegistered(receptorId)
+                !this.userService.isRegistered(receptor.getId())
             ) {
                 throw new UserNotFoundException();
             }
 
-            if(broadcasterId.equals(receptorId)) {
+            if(broadcasterId.equals(receptor.getId())) {
                 throw new SelfMessageException();
             }
         }
 
         MessageStore ms = this.messageRepository.get();
 
-        Message msg = new Message(broadcasterId, receptorId, message);
-        ms.getPrivateMessages().putIfAbsent(receptorId, new LinkedList<>());
-        ms.getPrivateMessages().get(receptorId).add(msg);
+        Message msg = new Message(broadcasterId, receptor.getId(), message);
+        ms.getPrivateMessages().putIfAbsent(receptor.getId(), new LinkedList<>());
+        ms.getPrivateMessages().get(receptor.getId()).add(msg);
         this.onSave(ms);
     }
 
