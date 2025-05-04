@@ -3,21 +3,30 @@ package br.ufal.ic.jackut.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.ufal.ic.jackut.exception.friendship.RegisteredFanException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfFanException;
+import br.ufal.ic.jackut.exception.friendship.SelfFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
+import br.ufal.ic.jackut.exception.message.SelfMessageException;
 import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
+import br.ufal.ic.jackut.model.Message;
+import br.ufal.ic.jackut.model.User;
 import br.ufal.ic.jackut.repository.FriendshipRepository;
 
 public class FriendshipService {
 
     private FriendshipRepository friendshipRepository;
     private UserService userService;
+    private MessageService messageService;
 
     public FriendshipService() {
         this.friendshipRepository = new FriendshipRepository();
         this.userService = new UserService();
+        this.messageService = new MessageService();
     }
     /**
      * Método utilizado para limpar o arquivo de persistência de dados do usuário
@@ -127,9 +136,116 @@ public class FriendshipService {
         String id = this.userService.getUserByLogin(username).getId();
         List<String> friendsIdList = getFriendsById(id);
         
-        return formattedFriendList(friendsIdList);
+        return formattedList(friendsIdList);
     }
 
+    public boolean isFan(String userName, String idolName) throws UserNotFoundException {
+        String userId = this.userService.getUserByLogin(userName).getId();
+        String idolId = this.userService.getUserByLogin(idolName).getId();
+
+        if(userId == null || idolId == null) 
+            throw new UserNotFoundException();
+
+        List<String> fans = this.getFansById(idolId);
+
+        if(fans == null) return false;
+
+        for(String user : fans) {
+            if (user.equals(userId)) return true;
+        }
+
+        return false;
+    }
+
+    public void addIdol(String userId, String idolName) 
+        throws RegisteredFanException, UserNotFoundException, SelfFanException
+    {
+        if (!this.userService.isRegistered(userId) || 
+            !this.userService.isRegistered(idolName)) 
+        {
+            throw new UserNotFoundException();
+        }
+
+        String idolId = this.userService.getUserByLogin(idolName).getId();
+
+        if (userId.equals(idolId))
+            throw new SelfFanException();
+        Friendship friendship = this.friendshipRepository.getFriendshipData();
+
+        friendship.getFans().putIfAbsent(idolId, new ArrayList<>());
+
+        if( friendship.getFans().get(idolId).contains(userId))
+            throw new RegisteredFanException();
+
+        friendship.getFans().get(idolId).add(userId);
+
+        this.friendshipRepository.saveFriendshipData(friendship);
+    }
+
+    public String getFans(String userName) {
+        String userId = this.userService.getUserByLogin(userName).getId();
+        return formattedList(this.getFansById(userId));
+    }
+
+    public boolean isFlirting(String userId, String flirtingName )
+        throws UserNotFoundException
+    {
+        String flirtingId = this.userService.getUserByLogin(flirtingName).getId();
+
+        if(userId == null || flirtingId == null) 
+            throw new UserNotFoundException();
+
+        List<String> flirtingList = this.getFlirtingById(userId);
+
+        if(flirtingList == null) return false;
+
+        return flirtingList.contains(flirtingId);
+    }
+
+    public void addFlirting(String userId, String flirtingName) 
+        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException
+    {
+
+        if (!this.userService.isRegistered(userId) || 
+            !this.userService.isRegistered(flirtingName)) 
+        {
+            throw new UserNotFoundException();
+        }
+        
+        User flirting = this.userService.getUserByLogin(flirtingName);
+
+        if(flirting.getId().equals(userId)) 
+            throw new SelfFlirtingException();
+
+        Friendship friendship = this.friendshipRepository.getFriendshipData();
+
+        friendship.getFlirtingMap().putIfAbsent(userId, new ArrayList<>());
+
+        if (friendship.getFlirtingMap().get(userId).contains(flirting.getId()))
+            throw new RegisteredFlirtingException();
+
+        friendship.getFlirtingMap().get(userId).add(flirting.getId());
+
+        if (friendship.getFlirtingMap().get(flirting.getId()) != null && 
+            friendship.getFlirtingMap().get(flirting.getId()).contains(userId)
+            ) {
+            User user = this.userService.getUserById(userId);
+
+            String msgToFliting = user.getAttribute("nome") + " é seu paquera - Recado do Jackut.";
+            String msgToUser = flirting.getAttribute("nome") + " é seu paquera - Recado do Jackut.";
+
+            this.messageService.sendMessage("system", user.getUsername(), msgToUser );
+            this.messageService.sendMessage("system", flirting.getUsername(), msgToFliting );
+            
+        }
+
+        this.friendshipRepository.saveFriendshipData(friendship);
+    }
+
+    public String getFlirting(String userId) {
+        List<String> flirtingList = this.getFlirtingById(userId);
+        return formattedList(flirtingList);
+    }
     /**
      * Método carrega os amigos pelo ID do usuário
      * @param id  ID do usuário
@@ -145,6 +261,14 @@ public class FriendshipService {
      */
     private List<String> getInvitesById(String id) {
         return this.friendshipRepository.getFriendshipData().getInvites().get(id);
+    }
+
+    private List<String> getFansById(String id) {
+        return this.friendshipRepository.getFriendshipData().getFans().get(id);
+    }
+
+    private List<String> getFlirtingById(String id) {
+        return this.friendshipRepository.getFriendshipData().getFlirtingMap().get(id);
     }
 
     /**
@@ -219,17 +343,16 @@ public class FriendshipService {
      * @return Retorna uma string com todos os IDs convertidos aos seus referidos nomes e separados por vírgula
      * @throws UserNotFoundException
      */
-    private String formattedFriendList(List<String> friendList) {
-        if (friendList == null) return "{}";
+    private String formattedList(List<String> list) {
+        if (list == null) return "{}";
 
-        friendList = friendList
+        list = list
             .stream()
             .map((String e) -> {
                 return this.userService.getUserById(e).getUsername();
             })
             .toList();
 
-        return friendList.toString().replace("[", "{").replace("]", "}").replace(" ", "");
+        return list.toString().replace("[", "{").replace("]", "}").replace(" ", "");
     }
-
 }

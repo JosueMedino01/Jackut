@@ -7,8 +7,12 @@ import br.ufal.ic.jackut.exception.community.CommunityNotFoundException;
 import br.ufal.ic.jackut.exception.community.MessageNotFoundException;
 import br.ufal.ic.jackut.exception.community.RegisteredCommunityException;
 import br.ufal.ic.jackut.exception.community.UserAlreadyInCommunityException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredFanException;
+import br.ufal.ic.jackut.exception.friendship.RegisteredFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredFriendshipException;
 import br.ufal.ic.jackut.exception.friendship.RegisteredInviteException;
+import br.ufal.ic.jackut.exception.friendship.SelfFanException;
+import br.ufal.ic.jackut.exception.friendship.SelfFlirtingException;
 import br.ufal.ic.jackut.exception.friendship.SelfFriendshipException;
 import br.ufal.ic.jackut.exception.message.MessageIsEmptyException;
 import br.ufal.ic.jackut.exception.message.SelfMessageException;
@@ -114,6 +118,36 @@ public class Facade {
         throws CommunityNotFoundException, UserNotFoundException 
     {
         this.communityService.sendMessage(userId, community, message);
+    }
+
+    public boolean ehFa(String userName, String idolName) throws UserNotFoundException {
+        return this.friendshipService.isFan(userName, idolName);
+    }
+
+    public void adicionarIdolo(String userId, String idolName) 
+        throws RegisteredFanException, UserNotFoundException, SelfFanException
+    {
+        this.friendshipService.addIdol(userId, idolName);
+    }
+
+    public String getFas(String userName) {
+        return this.friendshipService.getFans(userName);
+    }
+
+    public boolean ehPaquera(String userId, String flirtingName ) 
+        throws UserNotFoundException
+    {
+        return this.friendshipService.isFlirting(userId, flirtingName);
+    }
+    
+    public void adicionarPaquera(String userId, String flirtingName) 
+        throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException
+    {
+        this.friendshipService.addFlirting(userId, flirtingName);
+    }
+    
+    public String getPaqueras(String userId) {
+        return this.friendshipService.getFlirting(userId);
     }
 
     public void encerrarSistema() {

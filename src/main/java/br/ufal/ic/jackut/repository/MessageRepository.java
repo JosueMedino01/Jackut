@@ -11,7 +11,9 @@ import com.google.gson.Gson;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class MessageRepository {
@@ -39,16 +41,28 @@ public class MessageRepository {
      * Método responsável por retornar o Hash que armazena a Fila (Queue) das mensagens
      */
     public MessageStore get() {
-        try (FileReader reader = new FileReader(this.pathDB)) {
-            MessageStore data =  this.gson.fromJson(reader, MessageStore.class);
+    try (FileReader reader = new FileReader(this.pathDB)) {
+        MessageStore data = this.gson.fromJson(reader, MessageStore.class);
 
-            return (data == null) ? new MessageStore() : data;
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
+        if (data == null) {
             return new MessageStore();
         }
+
+        // ⚠️ CONVERTER List -> Queue manualmente
+        Map<String, Queue<Message>> fixedMap = new HashMap<>();
+        if (data.getPrivateMessages() != null) {
+            for (Map.Entry<String, ? extends Collection<Message>> entry : data.getPrivateMessages().entrySet()) {
+                fixedMap.put(entry.getKey(), new LinkedList<>(entry.getValue()));
+            }
+            data.setPrivateMessages(fixedMap);  // se você tiver o setter
+        }
+
+        return data;
+    } catch (IOException e) {
+        e.printStackTrace();
+        return new MessageStore();
     }
+}
     /**
      * Método responsável por limpar o arquivo de persistência de dados
      */

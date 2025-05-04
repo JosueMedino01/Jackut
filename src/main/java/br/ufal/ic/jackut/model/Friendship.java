@@ -7,10 +7,14 @@ import java.util.Map;
 public class Friendship {
     private Map<String, List<String>> friendships;
     private Map<String, List<String>> invites;
+    private Map<String, List<String>> fans;
+    private Map<String, List<String>> flirtingMap;
 
     public Friendship() {
         this.friendships = new HashMap<>();
         this.invites = new HashMap<>();
+        this.fans = new HashMap<>();
+        this.flirtingMap = new HashMap<>();
     }
 
     public Map<String, List<String>> getFriendships() {
@@ -27,5 +31,21 @@ public class Friendship {
 
     public void setInvites(Map<String, List<String>> invites) {
         this.invites = invites;
-    }   
+    }
+
+    public Map<String, List<String>> getFans() {
+        return fans;
+    }
+
+    public void setFans(Map<String, List<String>> fans) {
+        this.fans = fans;
+    }
+
+    public Map<String, List<String>> getFlirtingMap() {
+        return flirtingMap;
+    }
+
+    public void setFlirtingMap(Map<String, List<String>> flirtingMap) {
+        this.flirtingMap = flirtingMap;
+    }
 }
