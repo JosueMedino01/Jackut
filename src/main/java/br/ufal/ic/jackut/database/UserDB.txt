@@ -1,0 +1,11 @@
+f54fb1e1-8ae4-487f-a651-8d2e37253c1b;jpsauve;sauvejp;nome=Jacques Sauve
+f478c1f5-ed88-4902-93c9-4d6564ed61d3;fadejacques;seuqcajedaf;nome=Fã de Jacques
+d7a8ad03-99a4-42d7-8e95-8bd3754bcbb9;fa2dejacques;seuqcajedaf;nome=Fã 2 de Jacques
+000b854d-8b9e-4604-9322-9fd8a7fda839;paqueradejacques;abcdef;nome=Paquera de Jacques
+77774b48-0c47-4308-a6a0-34419bd462f5;paquera2dejacques;abcdef;nome=Paquera 2 de Jacques
+c70edea6-d916-4275-a706-24ee08441c75;inimigodejacques;abcdef;nome=Inimigo de Jacques
+c00e9ff8-3834-4446-a506-b4461803b6bd;inimigo2dejacques;abcdef;nome=Inimigo 2 de Jacques
+11410a5b-ce31-40ef-86e2-5754e19b60c1;jacquespersistente;abcdef;nome=Jacques Persistente
+bf481f5b-e194-4330-9170-7907f24eefe4;fapersistentedejacques;seuqcajedaf;nome=Fã Persistente de Jacques
+35e1e44d-1ccb-48aa-859a-98d0affffd75;paquerapersistentedejacques;abcdef;nome=Paquera Persistente de Jacques
+5f6e0dec-bb9c-4c2b-9f67-e92c80b73e55;inimigopersistentedejacques;abcdef;nome=Inimigo Persistente de Jacques

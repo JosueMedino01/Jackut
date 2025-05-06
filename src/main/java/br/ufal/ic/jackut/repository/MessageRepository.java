@@ -1,77 +1,45 @@
 package br.ufal.ic.jackut.repository;
 
-import br.ufal.ic.jackut.model.Friendship;
-import br.ufal.ic.jackut.model.Message;
 import br.ufal.ic.jackut.model.MessageStore;
 
-import java.util.Queue;
-
-import com.google.gson.Gson;
-
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.io.*;
 
 public class MessageRepository {
-    private final String pathDB = "./src/main/java/br/ufal/ic/jackut/database/MessageDB.json";
-    private final Gson gson;
-
-    public MessageRepository() {
-        this.gson = new Gson();
-    }
+    private final String pathDB = "./src/main/java/br/ufal/ic/jackut/database/MessageDB.txt";
 
     /**
      * Método responsável por salvar o Hash de mensagens
      * @param messageData Entidade que representa o Hash que armazena a Fila (Queue) das mensagens
      */
     public void save(MessageStore messageData) {
-        try (FileWriter writer = new FileWriter(this.pathDB)) {
-            this.gson.toJson(messageData, writer);
-        } 
-        catch (IOException e) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(this.pathDB))) {
+            oos.writeObject(messageData);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /*
+    /**
      * Método responsável por retornar o Hash que armazena a Fila (Queue) das mensagens
      */
     public MessageStore get() {
-    try (FileReader reader = new FileReader(this.pathDB)) {
-        MessageStore data = this.gson.fromJson(reader, MessageStore.class);
-
-        if (data == null) {
+        File file = new File(this.pathDB);
+        if (!file.exists()) {
             return new MessageStore();
         }
 
-        // ⚠️ CONVERTER List -> Queue manualmente
-        Map<String, Queue<Message>> fixedMap = new HashMap<>();
-        if (data.getPrivateMessages() != null) {
-            for (Map.Entry<String, ? extends Collection<Message>> entry : data.getPrivateMessages().entrySet()) {
-                fixedMap.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-            }
-            data.setPrivateMessages(fixedMap);  // se você tiver o setter
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.pathDB))) {
+            return (MessageStore) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new MessageStore();
         }
-
-        return data;
-    } catch (IOException e) {
-        e.printStackTrace();
-        return new MessageStore();
     }
-}
+
     /**
      * Método responsável por limpar o arquivo de persistência de dados
      */
     public void cleanUp() {
-        try (FileWriter writer = new FileWriter(this.pathDB)) {
-            MessageStore empty = new MessageStore();
-            this.gson.toJson(empty, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        save(new MessageStore()); // só salva um objeto vazio
     }
 }

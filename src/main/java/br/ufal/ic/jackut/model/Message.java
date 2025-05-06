@@ -1,6 +1,10 @@
 package br.ufal.ic.jackut.model;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String broadcasterId;
     private String receptorId;
     private String message;

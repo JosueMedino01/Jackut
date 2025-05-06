@@ -1,8 +1,10 @@
 package br.ufal.ic.jackut.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Community {
+public class Community implements Serializable  {
+    private static final long serialVersionUID = 1L;
     private String ownerId;
     private String name;
     private String description;

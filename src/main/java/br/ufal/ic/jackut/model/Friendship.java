@@ -1,10 +1,13 @@
 package br.ufal.ic.jackut.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Friendship {
+public class Friendship implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private Map<String, List<String>> friendships;
     private Map<String, List<String>> invites;
     private Map<String, List<String>> fans;

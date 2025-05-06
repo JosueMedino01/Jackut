@@ -53,5 +53,9 @@ public class User {
     public void setAttribute(String key, String value) {
         this.attributes.put(key, value);
     }
+
+    public Map<String, String> getAttributes() {
+        return this.attributes;
+    }
 }
 
