@@ -16,6 +16,11 @@ public class ManagerAccountService {
         this.messageService = new MessageService(friendshipService);
     }
 
+    /**
+     * Remove todos os dados relacionados a um usuário da rede social
+     * @param userId ID do usuário
+     * @throws UserNotFoundException Caso usuário não cadastrado
+     */
     public void dellAccount(String userId) throws UserNotFoundException{
         this.userService.dellProfile(userId);
         this.communityService.removeCommunityByOwnerId(userId);

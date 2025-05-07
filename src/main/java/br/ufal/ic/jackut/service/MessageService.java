@@ -94,6 +94,10 @@ public class MessageService {
         return msg.getMessage();
     }
 
+    /**
+     * Remove todas as mensagens que um usuário enviou
+     * @param userId ID do usuário
+     */
     public void deleteMessagesByUserId(String userId) {
         MessageStore record = this.messageRepository.get();
         Map<String, Queue<Message>> hashRecord = record.getPrivateMessages();
@@ -106,6 +110,10 @@ public class MessageService {
         this.onSave(record);
     }
     
+    /**
+     * Salva no arquivo de persistencia os dados
+     * @param ms Estrutura de mensagem a ser salvada no arquivo
+     */
     private void onSave(MessageStore ms) {
         this.messageRepository.save(ms);
     }

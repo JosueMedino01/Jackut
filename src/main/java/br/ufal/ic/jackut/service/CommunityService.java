@@ -30,10 +30,20 @@ public class CommunityService {
         this.data = this.messageRepository.get();
     }
     
+    /**
+     * Limpa o "banco de dados" das comunidades
+     */
     public void cleanUp() {
         this.communityRepository.cleanUp();
     }
 
+    /**
+     * Cria uma comunidade
+     * @param createrID ID do dono da comunidade
+     * @param name Nome da comunidade 
+     * @param description Descrição da comunidade 
+     * @throws RegisteredCommunityException Caso a comunidade já esteja cadastrada
+     */
     public void createCommunity(String createrID, String name, String description ) throws RegisteredCommunityException {
         if (this.getCommunityByName(name) != null) {
             throw new RegisteredCommunityException();
@@ -45,6 +55,12 @@ public class CommunityService {
         );
     }
 
+    /**
+     * Método lista a descrição de uma comunidade 
+     * @param name Nome da comunidade
+     * @return  String com a descriçao da comunidade
+     * @throws CommunityNotFoundException
+     */
     public String getDescriptionByCommunityName(String name) throws CommunityNotFoundException {
         Community community = this.getCommunityByName(name);
 
@@ -54,14 +70,25 @@ public class CommunityService {
         return community.getDescription();
     }
 
+    /**
+     * Método que responsável por encontrar o dono da comunidade
+     * @param name nome da comunidade 
+     * @return retormar um usuário
+     * @throws CommunityNotFoundException caso a comunidade não exista
+     */
     public String getOwner(String name) throws CommunityNotFoundException {
         Community community = this.getCommunityByName(name);
         if (community == null) 
             throw new CommunityNotFoundException();
         
         return this.userService.getUserById(community.getOwnerId()).getUsername();
-    }
-
+    }   
+    /**
+     * Método lista os membros de uma comunidade
+     * @param name nome da comunidade
+     * @return retorna uma string com os nomes dos membros da comunidade
+     * @throws CommunityNotFoundException Caso a comunidade não exista
+     */
     public String getMembers(String name) throws CommunityNotFoundException {
         Community community = this.getCommunityByName(name);
 
@@ -71,6 +98,12 @@ public class CommunityService {
         return this.formattedMemberList(community.getMembers());
     } 
 
+    /**
+     * Método lista as comunidades que um usuário é dono
+     * @param username username/login de um usuário
+     * @return lista de comunidades
+     * @throws UserNotFoundException caso não seja encontrado o usuário
+     */
     public String getCommunities(String username) throws UserNotFoundException {
         if (this.userService.getUserByLogin(username) == null) {
             throw new UserNotFoundException();
@@ -92,6 +125,14 @@ public class CommunityService {
         return this.fomattedStringList(community);
     }
     
+    /**
+     * Método responsável por adicionar um novo membro a uma comunidade
+     * @param userId ID do membro a ser adicionado
+     * @param communityName Nome da comunidade que o membro será adicionado
+     * @throws UserAlreadyInCommunityException Caso usuário já pertença a comunidade
+     * @throws CommunityNotFoundException Caso a comunidade passada não esteja cadastrada
+     * @throws UserNotFoundException Caso o usuário passado não esteja cadastrada
+     */
     public void addMember(String userId, String communityName) throws UserAlreadyInCommunityException, CommunityNotFoundException, UserNotFoundException{
         List<Community> communities = this.getCommunityList();
 
@@ -118,6 +159,12 @@ public class CommunityService {
         throw new CommunityNotFoundException();
     }
 
+    /**
+     * Método que ler as mensagens das comunidades que um usuário faz parte
+     * @param userId ID do usuário que vai ler a caixa de mensagens 
+     * @return A mensagem mais antiga enviada por alguma das comunidades que o userID participa
+     * @throws MessageNotFoundException Caso a caixa de mensagens esteja vazia
+     */
     public String readMessage(String userId) throws MessageNotFoundException {
         Queue<Message> queue = this.data.getCommunityMessages().get(userId);
     
@@ -131,6 +178,14 @@ public class CommunityService {
         return msg.getMessage();
     }
 
+    /**
+     * Método responsável por enviar uma mensagem para todos da comunidade
+     * @param userId ID do usuário que envia a mensagem
+     * @param communityName Nome da comunidade 
+     * @param message Mensagem a ser enviada
+     * @throws CommunityNotFoundException Caso a comunidade não seja cadastrado
+     * @throws UserNotFoundException Caso o usuário não seja cadastrado
+     */
     public void sendMessage(String userId, String communityName, String message) 
         throws CommunityNotFoundException, UserNotFoundException 
     {
@@ -151,18 +206,31 @@ public class CommunityService {
         this.messageRepository.save(this.data);
     }
 
+    /**
+     * Método que adiciona uma nova comunidade
+     * @param community Uma entidade Comunidade
+     */
     public void addCommunity(Community community) {
         List<Community> communities = getCommunityList();
         communities.add(community);
         this.communityRepository.saveCommunityList(communities);
     }
 
+    /**
+     * Método responsável por deletar uma comunidade pelo id do dono da comunidade
+     * @param ownerId ID do usuário que criou a comunidade
+     */
     public void removeCommunityByOwnerId(String ownerId) {
         List<Community> communities = getCommunityList();
         communities.removeIf(c -> c.getOwnerId().equals(ownerId));
         this.communityRepository.saveCommunityList(communities);
     }
 
+    /**
+     * Método responsável por buscar uma comunidade pelo nome
+     * @param name Nome da comunidade
+     * @return Uma comunidade
+     */
     private Community getCommunityByName(String name) {
         return this.getCommunityList()
             .stream()
@@ -171,10 +239,18 @@ public class CommunityService {
             .orElse(null);
     }
 
+    /**
+     * @return Método retorna uma lista de comunidades 
+     */
     private List<Community> getCommunityList() {
         return this.communityRepository.getCommunityList();
     }
 
+    /**
+     * Método responsável por formatar uma listagem de IDs para o Username do usuário
+     * @param list Uma lista de strings
+     * @return Retorna uma string representando os Logins/Username dos usuários
+     */
     private String formattedMemberList(List<String> memberList) {
         if (memberList == null) return "{}";
 
@@ -188,7 +264,12 @@ public class CommunityService {
         return memberList.toString().replace("[", "{").replace("]", "}").replace(" ", "");
     }
 
-
+    /**
+     * Método responsável por formatar uma listagem de acordo com 
+     * o padrão que o EasyAccept espera
+     * @param list Uma lista de strings
+     * @return Retorna uma string representando a lista formatada
+     */
     private String fomattedStringList(List<String> list) {
         if (list == null) return "{}";
 

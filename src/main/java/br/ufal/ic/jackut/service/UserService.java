@@ -14,7 +14,7 @@ import br.ufal.ic.jackut.repository.UserRepository;
 
 public class UserService {
     private final UserRepository userRepository;
-   /*  private final CommunityService communityService; */
+
     public UserService() {
         this.userRepository = new UserRepository();
         /* this.communityService = new CommunityService(); */
@@ -163,6 +163,11 @@ public class UserService {
         return (this.getUserByLogin(idOrUsername) != null);
     }
 
+    /**
+     * Deleta um perfil de usuário
+     * @param userId ID do usuário
+     * @throws UserNotFoundException Caso usuário não cadastrado
+     */
     public void dellProfile(String userId) throws UserNotFoundException{
         if (!this.isRegistered(userId))
             throw new UserNotFoundException();

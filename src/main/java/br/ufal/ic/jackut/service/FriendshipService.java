@@ -151,6 +151,13 @@ public class FriendshipService {
         return formattedList(friendsIdList);
     }
 
+    /**
+     * Verifica se existe uma relação de fan entre dois usuários
+     * @param userName username do primeiro usuário
+     * @param idolName username do segundo usuário
+     * @return Boleado caso exista uma relação de fan
+     * @throws UserNotFoundException Caso algum usuário não seja cadastrado
+     */
     public boolean isFan(String userName, String idolName) throws UserNotFoundException {
         String userId = this.userService.getUserByLogin(userName).getId();
         String idolId = this.userService.getUserByLogin(idolName).getId();
@@ -169,6 +176,15 @@ public class FriendshipService {
         return false;
     }
 
+    /**
+     * Adiciona um ídolo para o usuário com userID
+     * @param userId ID do do fan
+     * @param idolName Nome do ídolo
+     * @throws RegisteredFanException Caso relação de FAN existente
+     * @throws UserNotFoundException Caso algum usuário não seja cadastrado
+     * @throws SelfFanException Caso usuário tente adicionar a sim mesmo como fan
+     * @throws EnemyBlockException Caso existe uma relação de inimizade
+     */
     public void addIdol(String userId, String idolName) 
         throws RegisteredFanException, UserNotFoundException, SelfFanException, EnemyBlockException
     {
@@ -177,9 +193,6 @@ public class FriendshipService {
         {
             throw new UserNotFoundException();
         }
-
-        
-
 
         User idol = this.userService.getUserByLogin(idolName);
         
@@ -206,6 +219,13 @@ public class FriendshipService {
         return formattedList(this.getFansById(userId));
     }
 
+    /**
+     * Verifica se dois usuários estão numa relação de paquera
+     * @param userId ID do primeiro usuário
+     * @param flirtingName Username/login do segundo usuário
+     * @return Um boleano indicando se existe a relação de paquera
+     * @throws UserNotFoundException Caso algum usuário não seja cadastrado
+     */
     public boolean isFlirting(String userId, String flirtingName )
         throws UserNotFoundException
     {
@@ -221,6 +241,15 @@ public class FriendshipService {
         return flirtingList.contains(flirtingId);
     }
 
+    /**
+     * Adiciona uma nova relação de paquera
+     * @param userId ID do usuário que tá se declarando
+     * @param flirtingName Username/login do usuário pretedente
+     * @throws UserNotFoundException Caso não exista usuário
+     * @throws SelfFlirtingException Caso enviado para si mesmo o flerte
+     * @throws RegisteredFlirtingException Caso relação já exista por parte do userID
+     * @throws EnemyBlockException Caso exista uma relação de inimizade
+     */
     public void addFlirting(String userId, String flirtingName) 
         throws UserNotFoundException, SelfMessageException, SelfFlirtingException, RegisteredFlirtingException, EnemyBlockException
     {
@@ -265,6 +294,14 @@ public class FriendshipService {
         this.friendshipRepository.saveFriendshipData(friendship);
     }
 
+    /**
+     * Adiciona uma nova relação de inimizade
+     * @param userId ID do usuário que tá declarando inimizade
+     * @param enemyUsername Login do inimigo
+     * @throws UserNotFoundException Caso algum usuário não seja encontrado
+     * @throws RegisteredEnemyException Caso já exista a relação de inimizade por parte do USERID
+     * @throws SelfEnemyException Caso seja adicionado uma relação de inimizade para si mesmo
+     */
     public void addEnemy(String userId, String enemyUsername) 
         throws UserNotFoundException, RegisteredEnemyException, SelfEnemyException
     {
@@ -293,6 +330,11 @@ public class FriendshipService {
         this.friendshipRepository.saveFriendshipData(friendship);
     }
 
+    /**
+     * Retorna uma listagem com os paqueras de um usuário pelo seu ID
+     * @param id ID do usuário
+     * @return retorna string de paqueras
+     */
     public String getFlirting(String userId) {
         List<String> flirtingList = this.getFlirtingById(userId);
         return formattedList(flirtingList);
@@ -315,10 +357,20 @@ public class FriendshipService {
         return this.friendshipRepository.getFriendshipData().getInvites().get(id);
     }
 
+    /**
+     * Retorna uma listagem com os fans de um usuário pelo seu ID
+     * @param id ID do usuário
+     * @return retorna uma lista de IDs de fans
+     */
     private List<String> getFansById(String id) {
         return this.friendshipRepository.getFriendshipData().getFans().get(id);
     }
 
+    /**
+     * Retorna uma listagem com os paqueras de um usuário pelo seu ID
+     * @param id ID do usuário
+     * @return retorna uma lista de IDs de  paqueras
+     */
     private List<String> getFlirtingById(String id) {
         return this.friendshipRepository.getFriendshipData().getFlirtingMap().get(id);
     }
@@ -407,6 +459,13 @@ public class FriendshipService {
         return list.toString().replace("[", "{").replace("]", "}").replace(" ", "");
     }
 
+    /**
+     * Verifica se dois usuários são inimigos
+     * @param userId ID do primeiro usuário
+     * @param enemyId ID do segundo usuário
+     * @param data Um hashmap com os relacionamentos de inimizade
+     * @return Um boleano indicado se são inimigos
+     */
     public boolean isEnemy(String userId, String enemyId, Map<String, List<String>> data){
         return (data == null) 
                     ? false 

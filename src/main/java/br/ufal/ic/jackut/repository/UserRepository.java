@@ -19,6 +19,9 @@ public class UserRepository {
 
     }
 
+    /**
+     * Limpa o arquivo de persistência
+     */
     public void cleanUP() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.pathDB))) {
             writer.write(""); // limpa o arquivo
@@ -27,6 +30,9 @@ public class UserRepository {
         }
     }
 
+    /*
+     * Retorna todos os usuário cadastrados
+     */
     public List<User> getUserList() {
         List<User> users = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(this.pathDB))) {
@@ -42,7 +48,11 @@ public class UserRepository {
         }
         return users;
     }
-
+    
+    /**
+     * Adicionada um novo usuário, escreve a baixo dos usuário já existentes
+     * @param newUser Novo usuário
+     */
     public void addUser(User newUser) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.pathDB, true))) {
             writer.write(serializeUser(newUser));
@@ -54,6 +64,10 @@ public class UserRepository {
 
     
 
+    /**
+     * Atualiza as informações de um usuário no arquivo
+     * @param modifiedUser usuário modificado
+     */
     public void updateUser(User modifiedUser) {
         List<User> currentUsers = getUserList();
         boolean updated = false;
@@ -79,6 +93,10 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Sobrescreve no arquivo uma lista de usuários
+     * @param users lista de usuários
+     */
     public void saveUserList(List<User> users) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.pathDB))) {
             for (User user : users) {
