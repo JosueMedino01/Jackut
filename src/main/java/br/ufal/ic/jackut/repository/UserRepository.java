@@ -13,10 +13,10 @@ import java.util.Map;
 import br.ufal.ic.jackut.model.User;
 
 public class UserRepository {
-    private final String pathDB = "./src/main/java/br/ufal/ic/jackut/database/UserDB.txt"; // .txt para clareza
+    private final String pathDB = "./src/main/java/br/ufal/ic/jackut/database/UserDB.txt";
 
     public UserRepository() {
-        // Nenhuma inicialização necessária
+
     }
 
     public void cleanUP() {
@@ -52,6 +52,8 @@ public class UserRepository {
         }
     }
 
+    
+
     public void updateUser(User modifiedUser) {
         List<User> currentUsers = getUserList();
         boolean updated = false;
@@ -77,6 +79,17 @@ public class UserRepository {
         }
     }
 
+    public void saveUserList(List<User> users) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.pathDB))) {
+            for (User user : users) {
+                writer.write(serializeUser(user));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * Serializa o User para o formato:
      * id;username;password;chave1=valor1;chave2=valor2;...

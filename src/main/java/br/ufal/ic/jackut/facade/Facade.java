@@ -28,6 +28,7 @@ import br.ufal.ic.jackut.exception.user.UserNotFoundException;
 import br.ufal.ic.jackut.model.Friendship;
 import br.ufal.ic.jackut.service.CommunityService;
 import br.ufal.ic.jackut.service.FriendshipService;
+import br.ufal.ic.jackut.service.ManagerAccountService;
 import br.ufal.ic.jackut.service.MessageService;
 import br.ufal.ic.jackut.service.UserService;
 
@@ -36,12 +37,14 @@ public class Facade {
     private final FriendshipService friendshipService;
     private final MessageService messageService;
     private final CommunityService communityService;
+    private final ManagerAccountService managerAccountService;
 
     public Facade() {
         this.userService = new UserService();
         this.friendshipService = new FriendshipService();
         this.messageService = new MessageService(this.friendshipService);
         this.communityService = new CommunityService();
+        this.managerAccountService = new ManagerAccountService();
     }
 
     public void zerarSistema(){
@@ -164,6 +167,9 @@ public class Facade {
         this.friendshipService.addEnemy(userId, enemyUsername);
     }
 
+    public void removerUsuario(String userId) throws UserNotFoundException{
+        this.managerAccountService.dellAccount(userId);
+    }
     public void encerrarSistema() {
     }
 }

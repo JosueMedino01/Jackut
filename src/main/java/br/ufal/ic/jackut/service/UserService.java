@@ -1,5 +1,6 @@
 package br.ufal.ic.jackut.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import br.ufal.ic.jackut.exception.user.AlreadyUserException;
@@ -13,9 +14,10 @@ import br.ufal.ic.jackut.repository.UserRepository;
 
 public class UserService {
     private final UserRepository userRepository;
-
+   /*  private final CommunityService communityService; */
     public UserService() {
         this.userRepository = new UserRepository();
+        /* this.communityService = new CommunityService(); */
     }
     
     /**
@@ -159,6 +161,16 @@ public class UserService {
         }
          
         return (this.getUserByLogin(idOrUsername) != null);
+    }
+
+    public void dellProfile(String userId) throws UserNotFoundException{
+        if (!this.isRegistered(userId))
+            throw new UserNotFoundException();
+
+        List<User> userList = this.userRepository.getUserList();
+        userList.removeIf(user -> user.getId().equals(userId));
+
+        this.userRepository.saveUserList(userList);
     }
 
     /**

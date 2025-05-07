@@ -41,6 +41,4 @@ public class Community implements Serializable  {
     public void setMembers(List<String> members) {
         this.members = members;
     }
-
-
 }

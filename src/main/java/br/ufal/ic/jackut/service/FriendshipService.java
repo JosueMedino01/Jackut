@@ -297,6 +297,7 @@ public class FriendshipService {
         List<String> flirtingList = this.getFlirtingById(userId);
         return formattedList(flirtingList);
     }
+
     /**
      * Método carrega os amigos pelo ID do usuário
      * @param id  ID do usuário

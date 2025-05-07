@@ -2,6 +2,7 @@ package br.ufal.ic.jackut.service;
 
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import br.ufal.ic.jackut.exception.friendship.EnemyBlockException;
@@ -91,6 +92,18 @@ public class MessageService {
         this.messageRepository.save(record);
 
         return msg.getMessage();
+    }
+
+    public void deleteMessagesByUserId(String userId) {
+        MessageStore record = this.messageRepository.get();
+        Map<String, Queue<Message>> hashRecord = record.getPrivateMessages();
+
+        for (Map.Entry<String, Queue<Message>> entry : hashRecord.entrySet()) {
+            Queue<Message> messages = entry.getValue();
+            messages.removeIf(message -> message.getBroadcasterId().equals(userId) || message.getReceptorId().equals(userId));
+        }
+
+        this.onSave(record);
     }
     
     private void onSave(MessageStore ms) {

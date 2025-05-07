@@ -40,7 +40,7 @@ public class CommunityService {
         }
         List<String> members = new ArrayList<String>(); members.add(createrID);
        
-        this.communityRepository.addCommunity(
+        this.addCommunity(
             new Community(createrID, name, description, members)
         );
     }
@@ -149,6 +149,18 @@ public class CommunityService {
         }
 
         this.messageRepository.save(this.data);
+    }
+
+    public void addCommunity(Community community) {
+        List<Community> communities = getCommunityList();
+        communities.add(community);
+        this.communityRepository.saveCommunityList(communities);
+    }
+
+    public void removeCommunityByOwnerId(String ownerId) {
+        List<Community> communities = getCommunityList();
+        communities.removeIf(c -> c.getOwnerId().equals(ownerId));
+        this.communityRepository.saveCommunityList(communities);
     }
 
     private Community getCommunityByName(String name) {

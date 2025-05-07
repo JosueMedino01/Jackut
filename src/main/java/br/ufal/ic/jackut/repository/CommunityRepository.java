@@ -41,15 +41,5 @@ public class CommunityRepository {
         }
     }
 
-    public void addCommunity(Community community) {
-        List<Community> communities = getCommunityList();
-        communities.add(community);
-        saveCommunityList(communities);
-    }
-
-    public void removeCommunityById(String name) {
-        List<Community> communities = getCommunityList();
-        communities.removeIf(c -> c.getName().equals(name));
-        saveCommunityList(communities);
-    }
+    
 }
